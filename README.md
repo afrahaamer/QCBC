@@ -1,2 +1,2 @@
 # Quantum-Blockchain
-A blockchain implemented using quantum algorithm
+A blockchain integrated with quantum algorithms, quantum key distribution to increase it's security and efficiency.
