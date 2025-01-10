@@ -64,11 +64,16 @@ def b92_simulated_key_gen(key_length=20, error_rate=0.1):
     num_test_bits = int(key_length * 0.1)
     test_indices = np.random.choice(range(len(shared_key)), size=num_test_bits, replace=False)
     test_set = [shared_key[i] for i in test_indices]
-    alice_test_set = [alice_bits[i] for i in test_indices if bob_bases[i] != alice_bits[i]]
+
+    # Ensure alice_test_set has corresponding elements by checking valid indices
+    alice_test_set = [alice_bits[i] for i in test_indices if i < len(alice_bits) and bob_bases[i] != alice_bits[i]]
 
     # Calculate the error rate based on the test set
-    error_count = sum(1 for i in range(num_test_bits) if test_set[i] != alice_test_set[i])
-    measured_error_rate = error_count / num_test_bits
+    if len(test_set) == len(alice_test_set) and len(test_set) > 0:  # Check for non-empty and equal-length sets
+        error_count = sum(1 for i in range(len(test_set)) if test_set[i] != alice_test_set[i])
+        measured_error_rate = error_count / len(test_set)
+    else:
+        measured_error_rate = 0  # Default to zero error rate if sets are unequal or empty
 
     # Remove test bits from the shared key
     shared_key = [bit for i, bit in enumerate(shared_key) if i not in test_indices]

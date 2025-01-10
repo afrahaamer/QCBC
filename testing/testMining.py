@@ -2,7 +2,8 @@ import hashlib
 import time
 import json
 import numpy as np
-from qiskit import QuantumCircuit, Aer, execute
+from qiskit import QuantumCircuit, transpile
+from qiskit_aer import Aer
 import matplotlib.pyplot as plt
 backend = backend = Aer.get_backend('qasm_simulator')
 
@@ -127,7 +128,12 @@ def mine(input):
     grover_circuit = apply_hadamard(grover_circuit, [0, 1, 2, 3])
     grover_circuit.append(amplification_gate(), [0, 1, 2])
     grover_circuit.measure([0, 1, 2], [0, 1, 2])
-    job = execute(grover_circuit, backend, shots=8192)
+    # Transpile the circuit for the specified backend
+    transpiled_circuit = transpile(grover_circuit, backend)
+
+    # Execute the transpiled circuit
+    job = backend.run(transpiled_circuit, shots=8192)
+
     result = job.result()
     counts = result.get_counts()
     # Assuming the 'input' is the binary representation of 'something' to be found
