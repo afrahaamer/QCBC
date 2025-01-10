@@ -1,12 +1,13 @@
 import hashlib
 import time
 import json
-from qiskit import QuantumCircuit, Aer, execute, IBMQ
+from qiskit import QuantumCircuit, transpile
+from qiskit_aer import Aer
 from qiskit_ibm_provider import IBMProvider
 import numpy as np
 
 
-provider = IBMProvider(token='b530772a88decab6b6c1c115c8deb83803d185d9cc5eed26cc7df65a31b71a40954656fe484b1a1a3bcaa5dd17aebcc7eae98e2f7f3644bcb2eef7be3a0b90e3') #Please change the API token to your own token here before running
+provider = IBMProvider(token='4b0e46761fd74107c80eb85690e56159d465d8bcdc1d30940b7ce64161f13517444ca7b6e5f1764716ad226a41af43a53a5b864c6d37593f09d59aba18896b47') #Please change the API token to your own token here before running
 firstchoice = input("Simulator(1) or Real quantum machine(2): ")
 if firstchoice == '2':
     backend = provider.get_backend('ibm_brisbane') #Change the server if needed
@@ -130,7 +131,13 @@ def mine(input):
     grover_circuit = apply_hadamard(grover_circuit, [0, 1, 2, 3])
     grover_circuit.append(amplification_gate(), [0, 1, 2])
     grover_circuit.measure([0, 1, 2], [0, 1, 2])
-    job = execute(grover_circuit, backend, shots=8192)
+
+    # Transpile the circuit for the specified backend
+    transpiled_circuit = transpile(grover_circuit, backend)
+
+    # Execute the transpiled circuit
+    job = backend.run(transpiled_circuit, shots=8192)
+    
     result = job.result()
     counts = result.get_counts()
     # Assuming the 'input' is the binary representation of 'something' to be found
